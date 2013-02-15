@@ -1,0 +1,200 @@
+import java.util.*;
+
+public class Answer {
+
+  public static void main(String[] param) {
+
+		// TODO!!! Solutions to small problems
+		// that do not need an independent method!
+
+		// conversion double -> String (1)
+		String s1 = String.valueOf(Math.PI);
+		System.out.println(s1);
+		s1 = Double.toString(Math.E);
+		System.out.println(s1);
+
+		// conversion String -> int(2)
+		try {
+			s1 = "234";
+			int n1 = Integer.parseInt(s1);
+			System.out.println(s1 + " annab " + n1);
+		} catch (NumberFormatException e) {
+			System.out.println("Ei ole arv" + e);
+		}
+
+		// "hh:mm:ss"(3)
+		Calendar cc = Calendar.getInstance();
+		int tund = cc.get(Calendar.HOUR_OF_DAY);
+		int minut = cc.get(Calendar.MINUTE);
+		int sekund = cc.get(Calendar.SECOND);
+		System.out.println("Kellaaeg antud hetkel: " + tund + ":" + minut + ":"
+				+ sekund);
+
+		// cos 45 deg(4)
+		double rad = Math.toRadians(45);
+		double c = Math.cos(rad);
+		System.out.println("Koosinus 45 deg on: " + c);
+
+		// table of square roots(5)
+		System.out.println("Ruutjuurte tabel: ");
+		for (double i = 0; i <= 100; i += 5) {
+			double Ruutjuured = Math.sqrt(i);
+			System.out.printf("%6.2f      %6.2f\n", i, Ruutjuured);
+		}
+
+		// reverse case (6)
+		String firstString = "ABcd12";
+		String result = reverseCase(firstString);
+		System.out.println("\"" + firstString + "\" -> \"" + result + "\"");
+
+		// reverse string(7)
+		StringBuffer sona = new StringBuffer("Tagurpidi keeramine");
+		System.out.println("Ķigetpidi: " + sona);
+		sona.reverse();
+		// String uussona = sona.toString();
+		System.out.print("†mberkeeratult: " + sona);
+		System.out.println();
+
+		// count words (8)
+		String s = "How  many	 words   here";
+		int nw = countWords(s);
+		System.out.println(s + "\nVastus: " + String.valueOf(nw) + " s›na");
+
+		// pause. COMMENT IT OUT BEFORE JUNIT-TESTING!
+		// Difference between two moments of time in milliseconds (9)
+		long t1 = System.currentTimeMillis(); // hetk1
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			// do nothing
+		}
+		;
+		long t2 = System.currentTimeMillis(); // hetk2
+		System.out.println("Ajahetkede vahe oli: " + (t1 - t2));
+
+		// Create a list (ArrayList) of 100 random integers (Integer) in between
+		// 0 and 999 (10)
+		final int LSIZE = 100;
+		ArrayList<Integer> randList = new ArrayList<Integer>(LSIZE);
+		Random generaator = new Random();
+		for (int i = 0; i < LSIZE; i++) {
+			randList.add(new Integer(generaator.nextInt(1000)));
+		}
+		System.out.println("Before reverse:  " + randList);// (10)
+		reverseList(randList);
+		System.out.println("After reverse: " + (randList));// (16)
+		System.out.println("Maximum: " + maximum(randList));// (17)
+		System.out.println("Minimum: " + minimum(randList));// (11)
+
+		// HashMap tasks:
+		// create(12)
+		HashMap<String, String> hm = new HashMap<String, String>();
+
+		hm.put("I245", "Andmebaasissteemide alused");
+		hm.put("I219", "Tarkvaratehnika");
+		hm.put("I230", "Infossteemide anals ja projekteerimine");
+		hm.put("I231", "Algoritmid ja andmestruktuurid");
+		hm.put("I241", "Sidev›rgud");
+
+		System.out.println("Esialgne: ");
+		Set<Map.Entry<String, String>> set = hm.entrySet();
+		for (Map.Entry<String, String> me : set) {
+			System.out.print(me.getKey() + ": ");
+			System.out.println(me.getValue());
+		}
+
+		// print all keys(13)
+		System.out.println("V›tmed: " + hm.keySet());
+
+		// remove a key(14)
+		hm.remove("I245");
+
+		// print all pairs(15)
+		System.out.println("Peale eemaldamist: ");
+		Set<Map.Entry<String, String>> set2 = hm.entrySet();
+		for (Map.Entry<String, String> me : set2) {
+			System.out.print(me.getKey() + ": ");
+			System.out.println(me.getValue());
+		}
+	}
+
+	/**
+	 * Finding the maximal element.
+	 * 
+	 * @param a
+	 *            Collection of Comparable elements
+	 * @return maximal element.
+	 * @throws NoSuchElementException
+	 *             if <code> a </code> is empty.
+	 */
+	// maximal element(17)
+	static public <T extends Object & Comparable<? super T>> T maximum(
+			Collection<? extends T> a) throws NoSuchElementException {
+		return Collections.max(a); // TODO!!! Your code here
+	}
+
+	// minimal element(11)
+	static public <T extends Object & Comparable<? super T>> T minimum(
+			Collection<? extends T> a) throws NoSuchElementException {
+		return Collections.min(a); // TODO!!! Your code here
+	}
+
+	/**
+	 * Counting the number of words. Any number of any kind of whitespace
+	 * symbols between words is allowed.
+	 * 
+	 * @param text
+	 *            text
+	 * @return number of words in the text
+	 */
+	// Independent method int countWords (String text) for task 8
+	public static int countWords(String text) {
+		StringTokenizer st = new StringTokenizer(text);
+		return st.countTokens();
+		// kommentaar praktikumist v›ib kasutada ka splitti ja trimiga korjama
+		// learuse ra aga pikk ja tlikas
+	}
+
+	/**
+	 * Case-reverse. Upper -> lower AND lower -> upper.
+	 * 
+	 * @param s
+	 *            string
+	 * @return processed string
+	 */
+	// Independent method String reverseCase (String s) for task 6
+	public static String reverseCase(String s) {
+		if (s == null)
+			return null;
+		if (s.length() == 0)// kui on tegemist thja stringiga
+			return s;
+		StringBuffer res = new StringBuffer();
+		for (int i = 0; i < s.length(); i++) {
+			char ch = s.charAt(i);
+			if (Character.isLowerCase(ch)) {
+				res.append(Character.toUpperCase(ch));
+			} else {
+				if (Character.isUpperCase(ch)) {
+					res.append(Character.toLowerCase(ch));
+				} else {
+					res.append(ch);
+				}
+			}
+		}
+
+		return res.toString();
+	}
+
+	/**
+	 * List reverse. Do not create a new list.
+	 * 
+	 * @param list
+	 *            list to reverse
+	 */
+	// Reverse list (16)
+	public static <T extends Object> void reverseList(List<T> list)
+			throws UnsupportedOperationException {
+		Collections.reverse(list);// TODO!!! Your code here
+
+	}
+}
