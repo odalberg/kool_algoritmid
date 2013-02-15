@@ -49,7 +49,7 @@ public class Answer {
 
 		// reverse string(7)
 		StringBuffer sona = new StringBuffer("Tagurpidi keeramine");
-		System.out.println("Ķigetpidi: " + sona);
+		System.out.println("Õigetpidi: " + sona);
 		sona.reverse();
 		// String uussona = sona.toString();
 		System.out.print("†mberkeeratult: " + sona);
@@ -58,7 +58,7 @@ public class Answer {
 		// count words (8)
 		String s = "How  many	 words   here";
 		int nw = countWords(s);
-		System.out.println(s + "\nVastus: " + String.valueOf(nw) + " s›na");
+		System.out.println(s + "\nVastus: " + String.valueOf(nw) + " sõna");
 
 		// pause. COMMENT IT OUT BEFORE JUNIT-TESTING!
 		// Difference between two moments of time in milliseconds (9)
@@ -90,11 +90,11 @@ public class Answer {
 		// create(12)
 		HashMap<String, String> hm = new HashMap<String, String>();
 
-		hm.put("I245", "Andmebaasissteemide alused");
+		hm.put("I245", "Andmebaasisüsteemide alused");
 		hm.put("I219", "Tarkvaratehnika");
-		hm.put("I230", "Infossteemide anals ja projekteerimine");
+		hm.put("I230", "Infosüsteemide analüüs ja projekteerimine");
 		hm.put("I231", "Algoritmid ja andmestruktuurid");
-		hm.put("I241", "Sidev›rgud");
+		hm.put("I241", "Sidevõrgud");
 
 		System.out.println("Esialgne: ");
 		Set<Map.Entry<String, String>> set = hm.entrySet();
@@ -104,7 +104,7 @@ public class Answer {
 		}
 
 		// print all keys(13)
-		System.out.println("V›tmed: " + hm.keySet());
+		System.out.println("Võtmed: " + hm.keySet());
 
 		// remove a key(14)
 		hm.remove("I245");
@@ -151,8 +151,8 @@ public class Answer {
 	public static int countWords(String text) {
 		StringTokenizer st = new StringTokenizer(text);
 		return st.countTokens();
-		// kommentaar praktikumist v›ib kasutada ka splitti ja trimiga korjama
-		// learuse ra aga pikk ja tlikas
+		// kommentaar praktikumist võib kasutada ka splitti ja trimiga korjata
+		// ülearuse ära aga pikk ja tülikas
 	}
 
 	/**
