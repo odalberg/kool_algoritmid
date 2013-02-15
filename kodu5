@@ -1,0 +1,121 @@
+import java.util.*;
+
+public class Answer {
+
+  private String name;
+	private Answer firstChild;
+	private Answer nextSibling;
+
+	Answer(String n, Answer d, Answer r) {
+		name = n;
+		firstChild = d;
+		nextSibling = r;
+	}
+
+	// Koostage meetodid puu vasakpoolse suluesituse (String)
+	// järgi puu moodustamiseks (parseTree, tulemuseks puu juurtipp)
+	public static Answer parseTree(String s) {
+		if (s == null || s.isEmpty()) {
+			return null;
+		}
+		StringTokenizer tok = new StringTokenizer(s, ",()", true);
+		StringBuffer buf1 = new StringBuffer();
+		StringBuffer buf2 = new StringBuffer();
+		String str = tok.nextToken();
+		while (tok.hasMoreTokens()) {
+			String ajutine = tok.nextToken();
+			if (ajutine.equals("(")) {
+				int kinni = 0;
+				ajutine = tok.nextToken().trim();
+				while (kinni < 1) {
+					buf1 = buf1.append(ajutine);
+					ajutine = tok.nextToken();
+					if (ajutine.equals("(")) {
+						kinni--;
+					} else if (ajutine.equals(")")) {
+						kinni++;
+					}
+				}
+			}
+			if (ajutine.equals(",")) {
+				while (tok.hasMoreTokens()) {
+					buf2.append(tok.nextToken().trim());
+				}
+			}
+		}
+		return new Answer(str, Answer.parseTree(buf1.toString()),
+				Answer.parseTree(buf2.toString()));
+	}
+
+	// Etteantud puu parempoolse suluesituse leidmiseks stringina
+	// (puu juureks on tipp this, meetod rightParentheticRepresentation tulemust
+	// ei trüki,
+	// ainult tagastab String-tüüpi väärtuse)
+	public String rightParentheticRepresentation() {
+		StringBuffer buf = new StringBuffer();
+		if (firstChild != null) {
+			buf.append("(");
+			buf.append(firstChild.rightParentheticRepresentation());
+			buf.append(")");
+		}
+		buf.append(name);
+		if (nextSibling != null) {
+			buf.append(",");
+			buf.append(nextSibling.rightParentheticRepresentation());
+		}
+		return buf.toString();
+		
+		// String tagastus = "";
+		// if (firstChild != null) {
+		// tagastus += "(" + firstChild.rightParentheticRepresentation() + ")";
+		// }
+		// tagastus += name;
+		// if (nextSibling != null) {
+		// tagastus += "," + nextSibling.rightParentheticRepresentation();
+		// }
+		// return tagastus;
+	}
+
+	// Testpuude moodustamine ja tulemuse väljatrükk olgu peameetodis
+	public static void main(String[] param) {
+		String s = "A\t(\tB ,C)";
+		Answer t = Answer.parseTree(s);
+		String v = t.rightParentheticRepresentation();
+		System.out.println(s + " ==> " + v); // A(B,C) ==> (B,C)A
+
+		s = "A(C,B)";
+		String test = "";
+		test = s + " ==> "
+				+ (Answer.parseTree(s).rightParentheticRepresentation());
+		int neljastOK = 0;
+		if (test.equals(s + " ==> " + "(C,B)A")) {
+			neljastOK++;
+			System.out.println("Test1, Korras!");
+		}
+		s = "A(B(C(D(E))))";
+		test = s + " ==> "
+				+ (Answer.parseTree(s).rightParentheticRepresentation());
+		if (test.equals(s + " ==> " + "((((E)D)C)B)A")) {
+			neljastOK++;
+			System.out.println("Test2, Korras!");
+		}
+		s = "+(*(-(512,1),4),/(-6,3))";
+		test = s + " ==> "
+				+ (Answer.parseTree(s).rightParentheticRepresentation());
+		if (test.equals(s + " ==> " + "(((512,1)-,4)*,(-6,3)/)+")) {
+			neljastOK++;
+			System.out.println("Test3, Korras!");
+		}
+		s = "A(B,C,D,E,F)";
+		test = s + " ==> "
+				+ (Answer.parseTree(s).rightParentheticRepresentation());
+		if (test.equals(s + " ==> " + "(B,C,D,E,F)A")) {
+			neljastOK++;
+			System.out.println("Test4, Korras!");
+		}
+		if (neljastOK == 4) {
+			System.out.println("Kõik katsed läbisid testi!");
+		} else
+			System.out.println("Mõned katsed ei läbinud testi!");
+	}
+}
