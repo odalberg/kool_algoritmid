@@ -1,0 +1,135 @@
+import java.util.*;
+
+public class Answer {
+  private LinkedList<Integer> kasutatavList;
+
+	public static void main(String[] argum) {
+		Answer magasin = new Answer();
+		magasin.push(18);
+		magasin.push(92);
+		System.out.println(magasin.toString());
+
+		//try {
+		//	Answer klooniPrintimine = (Answer) magasin.clone();
+		//	System.out.println(klooniPrintimine);
+		//} catch (CloneNotSupportedException e) {
+		//	System.out.println("Ei saa koopiat teha!");
+		//}
+		
+		System.out.println(interpret ("12 8 5 - +"));
+	}
+
+	Answer() {
+	   kasutatavList = new LinkedList<Integer>();
+	}
+
+	// Koopia loomine
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		LinkedList<Integer> koopia = new LinkedList<Integer>(kasutatavList);
+		Answer listiKoopia = new Answer();
+		listiKoopia.kasutatavList = koopia;
+		return listiKoopia;
+	}
+
+	// Kontroll, kas magasin on tühi
+	public boolean stEmpty() {
+		return kasutatavList.isEmpty();
+	}
+
+	// Magasini elemendi lisamine
+	public void push(int a) {
+		kasutatavList.push(a);
+	}
+
+	// Magasinist elemendi võtmine
+	public int pop() {
+
+		if (stEmpty())
+			throw new RuntimeException("Magasin ei sisalda elemente!");
+		return kasutatavList.pop();
+	} // pop
+
+	// Aritmeetikatehe s ( + - * / ) magasini kahe pealmise elemendi vahel
+	// (tulemus pannakse uueks tipuks)
+	public void op(String s) {
+		int teine = pop();
+		int esimene = pop();
+		if (s.equals("+")) {
+			push(esimene + teine);
+		}
+		if (s.equals("-")) {
+			push(esimene - teine);
+		}
+		if (s.equals("*")) {
+			push(esimene * teine);
+		}
+		if (s.equals("/")) {
+			push(esimene / teine);
+		}
+	}
+
+	// Tipu lugemine eemaldamiseta
+	public int tos() {
+		if (stEmpty())
+			throw new RuntimeException("Magasin ei sisalda elemente!");
+		return kasutatavList.peek();// getFirst
+	}
+
+	// Kahe magasini v›rdsuse kindlakstegemine
+	@Override
+	public boolean equals(Object o) {
+		if (kasutatavList.equals(((Answer) o).kasutatavList)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	// Teisendus sõneks
+	@Override
+	public String toString() {
+		if (stEmpty()) {
+			return "Magasin ei sisalda elemente!";
+		}
+		StringBuffer strB = new StringBuffer();
+		for (int i = kasutatavList.size() - 1; i >= 0; i--) {
+			strB.append(String.valueOf(kasutatavList.get(i)) + " ");
+		}
+		return strB.toString();
+	}
+
+	// Kommentaar: Meetod interpret ei kontrolli, kas lõpuks jääb üksainus arv
+	// alles.
+	// Kui esineb mingi viga, siis peaks interpret viskama sobiva veateatega
+	// (Parandatud)
+	
+	// Aritmeetilise avaldise pööratud poola kuju
+	public static int interpret(String pol) {
+		Answer polMagasin = new Answer();
+		StringTokenizer tok = new StringTokenizer(pol);
+		while (tok.hasMoreElements()) {
+			String str = tok.nextToken();
+			if (str.equals("+") || str.equals("-") || str.equals("*")
+					|| str.equals("/")) {
+				polMagasin.op(str);
+			} else {
+				try {
+					int arv = Integer.parseInt(str);
+					polMagasin.push(arv);
+				} catch (NumberFormatException e) {
+					throw new RuntimeException(
+							"Ei ole number v›i on sobimatu tehtemrk!");
+					// + str, e);
+				}
+			}
+		}
+		int viimane = polMagasin.pop();
+		if (!polMagasin.stEmpty()) {
+			throw new RuntimeException(
+					"Magasin ei saanud tühjaks? Kontrollige, kas on kõik tehtemärgid sisestatud!");
+					//"Järelejäänud sisu: " + polMagasin.toString());
+		}
+		return viimane;
+	}
+}
