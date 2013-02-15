@@ -1,0 +1,200 @@
+import java.util.*;
+
+/**
+ * Prefix codes and Huffman tree. Tree depends on source data.
+ */
+public class Answer {
+  private HashMap<Byte, Integer> baitHash = new HashMap<Byte, Integer>();
+	private TreeSet<Node> Puu = new TreeSet<Node>();
+	private int kodeeriPikkus;
+	private HashMap<Byte, String> kodeeritudHash = new HashMap<Byte, String>();
+	private HashMap<String, Byte> dekodeeritudHash = new HashMap<String, Byte>();
+	private static Answer Huffman;
+
+	/**
+	 * Constructor to build the Huffman code for a given bytearray.
+	 * 
+	 * @param original
+	 *            source data
+	 */
+	Answer(byte[] original) {
+		if (original == null || original.length == 0) {
+			throw new java.lang.RuntimeException("Palun sisestage midagi!");
+		}
+		for (byte leia : original) {
+			if (baitHash.containsKey(leia)) {
+				baitHash.put(leia, baitHash.get(leia) + 1);
+			} else {
+				baitHash.put(leia, 1);
+			}
+		}
+		Iterator<Byte> v6tmed = baitHash.keySet().iterator();
+		while (v6tmed.hasNext()) {
+			byte v6ti = v6tmed.next();
+			Puu.add(new Node(v6ti, baitHash.get(v6ti)));
+		}
+		while (Puu.size() > 1) {
+			Node vasak = Puu.first();
+			Puu.remove(vasak);
+			Node parem = Puu.first();
+			Puu.remove(parem);
+			Node parentNode = new Node(vasak, parem);
+			Puu.add(parentNode);
+		}
+	}
+
+	/**
+	 * Length of encoded data in bits.
+	 * 
+	 * @return number of bits
+	 */
+	public int bitLength() {
+		return kodeeriPikkus;
+	}
+
+	/**
+	 * Encoding the byte array using this prefixcode.
+	 * 
+	 * @param origData
+	 *            original data
+	 * @return encoded data
+	 */
+	public byte[] encode(byte[] origData) {
+		Node kodeeri = Puu.first();
+		teeHuffman(kodeeri, "");
+		StringBuffer strB = new StringBuffer();
+		for (byte sisendBitt : origData) {
+			if (kodeeritudHash.containsKey(sisendBitt)) {
+				strB.append(kodeeritudHash.get(sisendBitt));
+			} else {
+				throw new IllegalArgumentException("Bitt puudub kooditabelist!");
+			}
+		}
+		kodeeriPikkus = strB.length();
+		byte[] tulemus = new byte[(int) Math.ceil(bitLength() / 8.0)];
+		for (int i = 0; i < bitLength(); i++) {
+			if (strB.charAt(i) == '1') {
+				int ruut = 7 - i % 8;
+				tulemus[i / 8] += (int) Math.pow(2, ruut);
+			}
+		}
+		return tulemus;
+	}
+
+	public void teeHuffman(Node midagi, String tekst) {
+		if (midagi.vasak == null && midagi.parem == null) {
+			tekst = tekst.equals("") ? "0" : tekst;
+			kodeeritudHash.put(midagi.ID, tekst);
+			dekodeeritudHash.put(tekst, midagi.ID);
+		}
+		if (midagi.vasak != null) {
+			teeHuffman(midagi.vasak, tekst + "0");
+		}
+		if (midagi.parem != null) {
+			teeHuffman(midagi.parem, tekst + "1");
+		}
+	}
+
+	/**
+	 * Decoding the byte array using this prefixcode.
+	 * 
+	 * @param encodedData
+	 *            encoded data
+	 * @return decoded data (hopefully identical to original)
+	 */
+	public byte[] decode(byte[] encodedData) {
+		StringBuffer strB = new StringBuffer();
+		for (byte bitt : encodedData) {
+			int onBait = bitt;
+			if (onBait < 0) {
+				onBait = onBait + 256;
+			}
+			for (int i = 0; i < 8; i++) {
+				int ruut = 7 - i % 8;
+				int testInt = (int) Math.pow(2, ruut);
+				if (onBait > testInt - 1) {
+					strB.append("1");
+					onBait = onBait - testInt;
+				} else {
+					strB.append("0");
+				}
+			}
+		}
+		ArrayList<Byte> dekodeeritud = new ArrayList<Byte>();
+		String baitToDecode = "";
+		for (int i = 0; i < bitLength(); i++) {
+			baitToDecode += strB.charAt(i);
+			if (dekodeeritudHash.containsKey(baitToDecode)) {
+				dekodeeritud.add(dekodeeritudHash.get(baitToDecode));
+				baitToDecode = "";
+			}
+		}
+		byte tulemus[] = new byte[dekodeeritud.size()];
+		for (int i = 0; i < dekodeeritud.size(); i++) {
+			tulemus[i] = dekodeeritud.get(i);
+		}
+		return tulemus;
+	}
+
+	class Node implements Comparable<Object> {
+		public byte ID;
+		public Node parem;
+		public Node vasak;
+		public int lugeja;
+
+		public Node(byte ID, int lugeja) {
+			this.ID = ID;
+			this.lugeja = lugeja;
+		}
+
+		public Node(Node parem, Node vasak) {
+			this.ID = (byte) (parem.ID + vasak.ID);
+			this.lugeja = parem.lugeja + vasak.lugeja;
+			this.parem = parem;
+			this.vasak = vasak;
+		}
+
+		@Override
+		public int compareTo(Object Value) {
+			Node j2rgmine = (Node) Value;
+			if (lugeja == j2rgmine.lugeja) {
+				return this.ID - j2rgmine.ID;
+			} else {
+				return this.lugeja - j2rgmine.lugeja;
+			}
+		}
+	}
+
+	/** Main method. */
+	public static void main(String[] params) {
+		String tekst = "AAAAAAAAAAAAABBBBBBCCCDDEEF";
+		byte[] orig = tekst.getBytes();
+		Answer huf = new Answer(orig);
+		byte[] kood = huf.encode(orig);
+		byte[] orig2 = huf.decode(kood);
+		// must be equal: orig, orig2
+		System.out.println("Kas on vÃµrdsed? " + Arrays.equals(orig, orig2)
+				+ "\n");
+		int lngth = huf.bitLength();
+		System.out.println("Length of encoded data in bits: " + lngth);
+
+		ArrayList<String> TestiList = new ArrayList<String>();
+		TestiList.add("ABCDEFAAABBC");
+		TestiList.add("X");
+		for (int h = 0; h < TestiList.size(); h++) {
+			if (test(TestiList.get(h)) == true) {
+				lngth = Huffman.bitLength();
+				System.out.println("Length of encoded data in bits: " + lngth);
+			} else
+				System.out.println("Test Failed!");
+		}
+	}
+
+	private static boolean test(String Test) {
+		byte[] orig = Test.getBytes();
+		Huffman = new Answer(orig);
+		byte[] kood = Huffman.encode(orig);
+		byte[] orig2 = Huffman.decode(kood);
+		return Arrays.equals(orig, orig2);
+	}
+}
