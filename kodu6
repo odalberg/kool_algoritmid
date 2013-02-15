@@ -1,0 +1,415 @@
+/**
+ * Koostada meetod, mis arvutab etteantud graafi G=(V, E) iga tipu v jaoks välja
+ * selle ekstsentrilisuse: e(v) = max {d(u, v)| u kuulub hulka V } , kus d(u, v)
+ * on tipu u kaugus tipust v
+ * 
+ * @author oliverdalberg
+ * 
+ */
+public class Answer {
+
+  /**
+	 * Tulemuste väljatrükk
+	 */
+	public void run() {
+		System.out.println("EKSTSENTRILISUSE LEIDMISE PROGRAMM\n");
+//		Graaf uus = Graaf.graafiLoomine("");
+//		System.out.println("Graafi tippude arv: " + uus.tippudeLugemine());
+//		System.out.println("Esialgne graaf:\n" + uus);
+//		uus.ekstsentrilisuseLeidmine();
+//		System.out.println("Tippude ekstsentrilisustega arvutatud graaf:\n"
+//				+ uus);
+//
+//		Graaf test1 = Graaf.test1("");
+//		System.out.println("Graafi tippude arv: " + test1.tippudeLugemine());
+//		System.out.println("Esialgne graaf:\n" + test1);
+//		test1.ekstsentrilisuseLeidmine();
+//		System.out.println("Tippude ekstsentrilisustega arvutatud graaf:\n"
+//				+ test1);
+//
+//		Graaf test2 = Graaf.test2("");
+//		System.out.println("Graafi tippude arv: " + test2.tippudeLugemine());
+//		System.out.println("Esialgne graaf:\n" + test2);
+//		test2.ekstsentrilisuseLeidmine();
+//		System.out.println("Tippude ekstsentrilisustega arvutatud graaf:\n"
+//				+ test2);
+//
+//		Graaf test3 = Graaf.test3("");
+//		System.out.println("Graafi tippude arv: " + test3.tippudeLugemine());
+//		System.out.println("Esialgne graaf:\n" + test3);
+//		test3.ekstsentrilisuseLeidmine();
+//		System.out.println("Tippude ekstsentrilisustega arvutatud graaf:\n"
+//				+ test3);
+
+		Graaf test4 = Graaf.test4("");
+		System.out.println("Graafi tippude arv: " + test4.tippudeLugemine());
+		System.out.println("Esialgne graaf:\n" + test4);
+		test4.ekstsentrilisuseLeidmine();
+		System.out.println("Tippude ekstsentrilisustega arvutatud graaf:\n"
+				+ test4);
+	}
+
+	public static void main(String[] args) {
+		Answer inst = new Answer();
+		inst.run();
+	}
+}
+
+/**
+ * Klass Graaf, milles tehakse graafide loomine, külgnevusmaatriksi ehitaimine
+ * ja algoritmide rakendamine
+ * 
+ */
+class Graaf {
+
+	Tipp algus;
+
+	public int tippudeLugemine() {
+		int lugeja = 0;
+		Tipp tp = algus;
+		while (tp != null) {
+			lugeja++;
+			tp = tp.getJargmineTipp();
+		}
+		return lugeja;
+	}
+
+	/**
+	 * Külgnevusmaatriksi loomine Floyd-Warshalli algoritmi tarbeks
+	 */
+	public int[][] kylgnevusMaatriks() {
+		int tArv = tippudeLugemine();
+		int[][] maatriks = new int[tArv][tArv];
+		int lopmatus = Integer.MAX_VALUE / 2;
+
+		Tipp[] tipud = new Tipp[tArv];
+		Tipp t = algus;
+		int abi = 0;
+		while (t != null) {
+			tipud[abi] = t;
+			t = t.getJargmineTipp();
+			abi++;
+		}
+
+		for (int i = 0; i < tArv; i++) {
+			for (int j = 0; j < tArv; j++) {
+				int num = 0;
+				if (i != j) {
+					num = lopmatus;
+				}
+				maatriks[i][j] = num;
+			}
+		}
+
+		for (int i = 0; i < tArv; i++) {
+			Tipp algus = tipud[i];
+			Tipp lopp;
+			int algusindeks = i;
+			int loppindeks = 0;
+
+			Kaar kr = algus.getEsimeneKaar();
+			while (kr != null) {
+				lopp = kr.getKuhuLaheb();
+				for (int p = 0; p < tArv; p++) {
+					if (lopp == tipud[p]) {
+						loppindeks = p;
+					}
+				}
+				maatriks[algusindeks][loppindeks] = kr.getKaareKaal();
+				kr = kr.getJargmineKaar();
+			}
+		}
+		return maatriks;
+	}
+
+	public int[][] koopia(int[][] kop) {
+		int kp = kop.length;
+		int[][] uusMaatriks = new int[kp][kp];
+		for (int i = 0; i < kp; i++) {
+			for (int j = 0; j < kp; j++) {
+				uusMaatriks[i][j] = kop[i][j];
+			}
+		}
+		return uusMaatriks;
+	}
+
+	/**
+	 * Floyd-Warshalli algoritm, tagastab lähimad teepikkused kõikide tippude
+	 * vahel
+	 */
+	public int[][] lyhimadTeepikkused() {
+		int tip = tippudeLugemine();
+		int kaugusteMaatriks[][] = kylgnevusMaatriks();
+		int[][] maatriks = koopia(kaugusteMaatriks);
+
+		for (int k = 0; k < tip; k++) {
+			for (int i = 0; i < tip; i++) {
+				for (int j = 0; j < tip; j++) {
+					maatriks[i][j] = Math.min(maatriks[i][j], maatriks[i][k]
+							+ maatriks[k][j]);
+				}
+			}
+		}
+		return maatriks;
+	}
+
+	/**
+	 * Ekstsentrilisuse leidmine. Pikima miinimumtee pikkus antud tipust graafi
+	 * mingi teise tipuni.
+	 */
+	public int[] ekstsentrilisuseLeidmine() {
+		int[][] maatriks = lyhimadTeepikkused();
+		int mat = maatriks.length;
+		int[] eksts = new int[mat];
+
+		Tipp[] tipud = new Tipp[mat];
+		Tipp tp = algus;
+		int abi = 0;
+		while (tp != null) {
+			tipud[abi] = tp;
+			tp = tp.getJargmineTipp();
+			abi++;
+		}
+
+		for (int i = 0; i < mat; i++) {
+			int vaikseim = Integer.MIN_VALUE;
+			for (int j = 0; j < mat; j++) {
+				if (maatriks[i][j] > vaikseim
+						&& maatriks[i][j] < (Integer.MAX_VALUE / 2 - 1)) {
+					vaikseim = maatriks[i][j];
+				}
+
+			}
+			eksts[i] = vaikseim;
+
+		}
+
+		for (int p = 0; p < mat; p++) {
+			(tipud[p]).setEkstsentrilisus(eksts[p]);
+		}
+		return eksts;
+
+	}
+
+	/**
+	 * Graafi loomise meetod
+	 */
+//	public static Graaf graafiLoomine(String s) {
+//		Graaf grf = new Graaf(s);
+//		Tipp a = new Tipp("A");
+//		Tipp b = new Tipp("B");
+//		Tipp c = new Tipp("C");
+//		Tipp d = new Tipp("D");
+//		Tipp e = new Tipp("E");
+//		Tipp f = new Tipp("F");
+//		Tipp g = new Tipp("G");
+//		grf.setAlgus(a);
+//		a.setEsimeneKaar(new Kaar("A-B", new Kaar("A-C", new Kaar("A-D",
+//				new Kaar("A-F", null, f, 1), d, 12), c, 4), b, 2));
+//		a.setJargmineTipp(b);
+//		b.setEsimeneKaar(new Kaar("B-C", new Kaar("B-E", null, e, 8), c, 7));
+//		b.setJargmineTipp(c);
+//		c.setEsimeneKaar(new Kaar("C-D", null, d, 5));
+//		c.setJargmineTipp(d);
+//		d.setEsimeneKaar(null);
+//		d.setJargmineTipp(e);
+//		e.setEsimeneKaar(new Kaar("E-D", null, d, 4));
+//		e.setJargmineTipp(f);
+//		f.setEsimeneKaar(new Kaar("F-E", null, e, 3));
+//		f.setJargmineTipp(g);
+//		g.setEsimeneKaar(new Kaar("G-A", new Kaar("G-F", null, f, 7), a, 10));
+//		g.setJargmineTipp(null);
+//
+//		return grf;
+//	}
+//
+//	public static Graaf test1(String s) {
+//		Graaf test1 = new Graaf(s);
+//		Tipp a = new Tipp("A");
+//		Tipp b = new Tipp("B");
+//		Tipp c = new Tipp("C");
+//		test1.setAlgus(a);
+//		a.setEsimeneKaar(new Kaar("A-A", new Kaar("A-B", null, b, 1), a, 8));
+//		a.setJargmineTipp(b);
+//		b.setEsimeneKaar(new Kaar("B-C", null, c, 1));
+//		b.setJargmineTipp(c);
+//		c.setEsimeneKaar(new Kaar("C-A", null, a, 5));
+//		c.setJargmineTipp(null);
+//
+//		return test1;
+//	}
+//
+//	public static Graaf test2(String s) {
+//		Graaf test2 = new Graaf(s);
+//		Tipp a = new Tipp("A");
+//		Tipp b = new Tipp("B");
+//		Tipp c = new Tipp("C");
+//		Tipp d = new Tipp("D");
+//		Tipp e = new Tipp("E");
+//		test2.setAlgus(a);
+//		a.setEsimeneKaar(new Kaar("A-B", new Kaar("A-C", new Kaar("A-E", null,
+//				e, 4), c, 18), b, 6));
+//		a.setJargmineTipp(b);
+//		b.setEsimeneKaar(new Kaar("B-C", null, c, 8));
+//		b.setJargmineTipp(c);
+//		c.setEsimeneKaar(null);
+//		c.setJargmineTipp(d);
+//		d.setEsimeneKaar(new Kaar("D-C", null, c, 3));
+//		d.setJargmineTipp(e);
+//		e.setEsimeneKaar(new Kaar("E-D", null, d, 2));
+//		e.setJargmineTipp(null);
+//
+//		return test2;
+//	}
+//
+//	public static Graaf test3(String s) {
+//		Graaf test3 = new Graaf(s);
+//		Tipp a = new Tipp("A");
+//		Tipp b = new Tipp("B");
+//		Tipp c = new Tipp("C");
+//		Tipp d = new Tipp("D");
+//		test3.setAlgus(a);
+//		a.setEsimeneKaar(new Kaar("A-C", new Kaar("A-D", null, d, 4), c, -2));
+//		a.setJargmineTipp(b);
+//		b.setEsimeneKaar(null);
+//		b.setJargmineTipp(c);
+//		c.setEsimeneKaar(new Kaar("C-B", null, a, 8));
+//		c.setJargmineTipp(d);
+//		d.setEsimeneKaar(new Kaar("D-C", null, c, 1));
+//		d.setJargmineTipp(null);
+//
+//		return test3;
+//	}
+
+	public static Graaf test4(String s) {
+		Graaf test4 = new Graaf(s);
+		Tipp a = new Tipp("A");
+		Tipp b = new Tipp("B");
+		Tipp c = new Tipp("C");
+		test4.setAlgus(a);
+		a.setEsimeneKaar(new Kaar("A-B", null, b, 3));
+		a.setJargmineTipp(b);
+		b.setEsimeneKaar(new Kaar("B-A", null, a, 5));
+		b.setJargmineTipp(c);
+		c.setEsimeneKaar(new Kaar("C-A", new Kaar("C-B", null, b, 2), a, 8));
+		c.setJargmineTipp(null);
+
+		return test4;
+	}
+	
+	public String toString() {
+		String abi = "";
+		Tipp t = getAlgus();
+		while (t != null) {
+			abi += t.getTipuNimi();
+			Kaar k = t.getEsimeneKaar();
+			if (k != null) {
+				abi += " " + t.getEkstsentrilisus() + " --> ";
+			}
+			while (k != null) {
+				abi += k.getKuhuLaheb().getTipuNimi() + " (" + k.getKaareNimi()
+						+ " \"" + k.getKaareKaal() + "\") ";
+				k = k.getJargmineKaar();
+			}
+			abi += "\n";
+			t = t.getJargmineTipp();
+		}
+		return abi;
+	}
+	
+	public Graaf(String s) {
+		algus = null;
+	}
+
+	public Tipp getAlgus() {
+		return algus;
+	}
+
+	public void setAlgus(Tipp e) {
+		algus = e;
+	}
+}
+
+/**
+ * Klass Tipp, võimaldamaks toiminguid tippudega
+ */
+class Tipp {
+	String tipuNimi;
+	Kaar esimeneKaar;
+	Tipp jargmineTipp;
+	int ekstsentrilisus;
+
+	public Tipp(String s) {
+		tipuNimi = s;
+		esimeneKaar = null;
+		jargmineTipp = null;
+	}
+
+	public Tipp(String tipuN, Kaar esimeneK, Tipp jargmineT) {
+		tipuNimi = tipuN;
+		esimeneKaar = esimeneK;
+		jargmineTipp = jargmineT;
+	}
+
+	public Kaar getEsimeneKaar() {
+		return esimeneKaar;
+	}
+
+	public Tipp getJargmineTipp() {
+		return jargmineTipp;
+	}
+
+	public String getTipuNimi() {
+		return tipuNimi;
+	}
+
+	public int getEkstsentrilisus() {
+		return ekstsentrilisus;
+	}
+
+	public void setEkstsentrilisus(int e) {
+		ekstsentrilisus = e;
+	}
+
+	public void setEsimeneKaar(Kaar e) {
+		esimeneKaar = e;
+	}
+
+	public void setJargmineTipp(Tipp j) {
+		jargmineTipp = j;
+	}
+}
+
+/**
+ * Klass Kaar, võimaldamaks toiminguid kaartega
+ */
+class Kaar {
+	String kaareNimi;
+	int kaareKaal;
+	Kaar jargmineKaar;
+	Tipp kuhuLaheb;
+
+	public Kaar(String kaarN, Kaar jargmineK, Tipp kuhuL, int kaareK) {
+		kaareNimi = kaarN;
+		jargmineKaar = jargmineK;
+		kuhuLaheb = kuhuL;
+		kaareKaal = kaareK;
+	}
+
+	public Tipp getKuhuLaheb() {
+		return kuhuLaheb;
+	}
+
+	public Kaar getJargmineKaar() {
+		return jargmineKaar;
+	}
+
+	public String getKaareNimi() {
+		return kaareNimi;
+	}
+
+	public int getKaareKaal() {
+		return kaareKaal;
+	}
+
+}
